@@ -6,8 +6,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     WNDCLASSEX wc; // Define a structure for window class
     HWND hwnd;     // Handle to the window
     MSG msg;       // Message structure for handling messages
-    RECT rcClient;
-    GetClientRect(hwnd, &rcClient); // Get the client area of the window
 
     HWND hwndButton; // Declare a handle for the button control
     HWND hwndLabel;  // Declare a handle for the label control
@@ -52,18 +50,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     ShowWindow(hwnd, nCmdShow);
     UpdateWindow(hwnd);
 
+    RECT rcClient;
+    GetClientRect(hwnd, &rcClient); // Get the client area of the window
+
     int labelWidth = 350;
     int xPosition = (rcClient.right - rcClient.left - labelWidth) / 2;
+    char *labelText = "";
 
     hwndLabel = CreateWindow(
-        "STATIC",                          // Class name
-        "Label Text",                      // Text
-        WS_VISIBLE | WS_CHILD | SS_CENTER, // Styles
-        xPosition, 10, labelWidth, 50,     // Position and size
-        hwnd,                              // Parent window handle
-        (HMENU)2,                          // Label identifier (used for handling messages)
-        hInstance,                         // Application instance handle
-        NULL                               // Additional data (usually NULL)
+        "STATIC",                      // Class name
+        labelText,                     // Text
+        WS_VISIBLE | WS_CHILD,         // Styles
+        xPosition, 10, labelWidth, 50, // Position and size
+        hwnd,                          // Parent window handle
+        (HMENU)2,                      // Label identifier (used for handling messages)
+        hInstance,                     // Application instance handle
+        NULL                           // Additional data (usually NULL)
     );
 
     hwndButton = CreateWindow(
@@ -82,6 +84,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     {
         TranslateMessage(&msg); // Translate virtual-key messages into character messages
         DispatchMessage(&msg);  // Dispatch the message to the window procedure
+
+        // Handle WM_COMMAND messages
+        switch (msg.message)
+        {
+        case WM_COMMAND:
+            if (LOWORD(msg.wParam) == 1)
+            {
+                // Button was clicked, perform your action here
+                MessageBox(hwnd, "Button Clicked!", "Button Clicked", MB_ICONINFORMATION | MB_OK);
+
+                // Retrieve the handle of the label control by its identifier
+                HWND hwndLabel = GetDlgItem(hwnd, 2);
+
+                // Update the label's text
+                SetWindowText(hwndLabel, "1");
+
+                // Trigger a repaint of the window to reflect the updated label text
+                RedrawWindow(hwndLabel, NULL, NULL, RDW_INVALIDATE);
+            }
+            break;
+        }
     }
 
     // Return the wParam of the Quit message to terminate the application
